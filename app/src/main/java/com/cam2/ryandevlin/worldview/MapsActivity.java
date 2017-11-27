@@ -43,6 +43,14 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.DirectionsApi;
+import com.google.maps.GeoApiContext;
+import com.google.maps.android.PolyUtil;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.TravelMode;
+
 import android.location.Address;
 
 import java.io.IOException;
@@ -64,10 +72,12 @@ import android.widget.SearchView;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.Adapter;
 import android.view.View;
+
+import org.joda.time.DateTime;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-
-
+import java.util.concurrent.TimeUnit;
 
 
 /////////////////
@@ -121,6 +131,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mDrawerList = (ListView)findViewById(R.id.navList);
         defaultDrawerItems();
+
+
 
     }
     private void defaultDrawerItems() {
@@ -476,9 +488,76 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        DirectionsResult test = new DirectionsResult();
+        try {
+            test = setDirections(mMap, "West Lafayette", "New York");
+            addMarkersToMap(test,mMap);
+            addPolyline(test,mMap);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ApiException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int alp = 0;
 
 
+    }
 
+    private GeoApiContext getGeoContext(){
+
+        //connection timeout : default connection timeout for new connections
+        //query rate: max number of queries that will be executed in 1 second intervals
+        //the default read timeout for new connections
+        //the default write timeout for new connections
+
+        GeoApiContext geoApiContext = new GeoApiContext();
+        return geoApiContext.setQueryRateLimit(3).setApiKey("AIzaSyBUk43bX4UmObgrUZooRrsS-86PxSYelbU")
+                .setConnectTimeout(1, TimeUnit.SECONDS).setReadTimeout(1, TimeUnit.SECONDS)
+                .setWriteTimeout(1, TimeUnit.SECONDS);
+    }
+
+    public DirectionsResult setDirections(GoogleMap mMap, String origin, String destination) throws InterruptedException, ApiException, IOException {
+        DateTime now = new DateTime();
+
+        //mode = travelmode which can be walking, driving, etc...
+        //origin is where you start
+        //destination is where you want to go.
+        //departure time is when you want to depart.
+
+        DirectionsResult result = DirectionsApi.newRequest(getGeoContext())
+                .mode(TravelMode.DRIVING).origin(origin)
+                .destination(destination).departureTime(now)
+                .await();
+
+        return result;
+    }
+
+    private void addMarkersToMap(DirectionsResult results, GoogleMap mMap) {
+
+        if(results == null){
+            return;
+        }
+
+        mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].
+                legs[0].startLocation.lat,results.routes[0].legs[0].startLocation.lng)).
+                title(results.routes[0].legs[0].startAddress));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].
+                legs[0].endLocation.lat,results.routes[0].legs[0].endLocation.lng)).
+                title(results.routes[0].legs[0].endAddress).snippet(getEndLocationTitle(results)));
+    }
+
+    private String getEndLocationTitle(DirectionsResult results) {
+        return "Time :" + results.routes[0].legs[0].duration.humanReadable
+                + " Distance :" + results.routes[0].legs[0].distance.humanReadable;
+    }
+
+
+    private void addPolyline(DirectionsResult results, GoogleMap mMap) {
+        List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
+        mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
 
     }
 
