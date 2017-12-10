@@ -43,6 +43,14 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.DirectionsApi;
+import com.google.maps.GeoApiContext;
+import com.google.maps.android.PolyUtil;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.TravelMode;
+
 import android.location.Address;
 
 import java.io.IOException;
@@ -64,9 +72,8 @@ import android.widget.SearchView;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.Adapter;
 import android.view.View;
-import java.util.ArrayList;
-import java.util.Arrays;
 
+<<<<<<< HEAD
 /* Directions */
 import com.google.android.gms.maps.model.Polyline;
 import com.google.maps.DirectionsApi;
@@ -109,7 +116,13 @@ import android.app.Dialog;
 import android.support.v4.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Build;
+=======
+import org.joda.time.DateTime;
+>>>>>>> 9d12ef7180da2264a6910cb579f1ccab34c5e1a3
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 //////////////////
 
@@ -183,6 +196,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mDrawerList = (ListView) findViewById(R.id.navList);
         defaultDrawerItems();
 
+<<<<<<< HEAD
         //String sUrl = "www.google.com";
         //new GetUrlContentTask().execute(sUrl);
         requestQueue = Volley.newRequestQueue(this);
@@ -277,6 +291,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         );
         // Adds the JSON object request "obreq" to the request queue
         requestQueue.add(arrayreq);
+=======
+
+>>>>>>> 9d12ef7180da2264a6910cb579f1ccab34c5e1a3
 
     }
 
@@ -732,7 +749,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        DirectionsResult test = new DirectionsResult();
+        try {
+            test = setDirections(mMap, "West Lafayette", "New York");
+            addMarkersToMap(test,mMap);
+            addPolyline(test,mMap);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ApiException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+        int alp = 0;
+
+
+    }
+
+    private GeoApiContext getGeoContext(){
+
+        //connection timeout : default connection timeout for new connections
+        //query rate: max number of queries that will be executed in 1 second intervals
+        //the default read timeout for new connections
+        //the default write timeout for new connections
+
+<<<<<<< HEAD
     }
 
     private GeoApiContext getGeoContext() {
@@ -749,6 +791,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public DirectionsResult setDirections(GoogleMap mMap, com.google.maps.model.LatLng origin, com.google.maps.model.LatLng destination) throws InterruptedException, ApiException, IOException {
+=======
+        GeoApiContext geoApiContext = new GeoApiContext();
+        return geoApiContext.setQueryRateLimit(3).setApiKey("AIzaSyBUk43bX4UmObgrUZooRrsS-86PxSYelbU")
+                .setConnectTimeout(1, TimeUnit.SECONDS).setReadTimeout(1, TimeUnit.SECONDS)
+                .setWriteTimeout(1, TimeUnit.SECONDS);
+    }
+
+    public DirectionsResult setDirections(GoogleMap mMap, String origin, String destination) throws InterruptedException, ApiException, IOException {
+>>>>>>> 9d12ef7180da2264a6910cb579f1ccab34c5e1a3
         DateTime now = new DateTime();
 
         //mode = travelmode which can be walking, driving, etc...
@@ -764,6 +815,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return result;
     }
 
+<<<<<<< HEAD
     private void addPolyline(DirectionsResult results, GoogleMap mMap) {
         List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
         route = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).width(12).color(Color.argb(200, 255, 102, 102)).geodesic(true));
@@ -772,6 +824,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public com.google.maps.model.LatLng LatLng_Convert(LatLng prev) { //small function to handle latlng class conversions because Google decided to make conflicting classes
         com.google.maps.model.LatLng result = new com.google.maps.model.LatLng(0, 0);
+=======
+    private void addMarkersToMap(DirectionsResult results, GoogleMap mMap) {
+
+        if(results == null){
+            return;
+        }
+
+        mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].
+                legs[0].startLocation.lat,results.routes[0].legs[0].startLocation.lng)).
+                title(results.routes[0].legs[0].startAddress));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].
+                legs[0].endLocation.lat,results.routes[0].legs[0].endLocation.lng)).
+                title(results.routes[0].legs[0].endAddress).snippet(getEndLocationTitle(results)));
+    }
+
+    private String getEndLocationTitle(DirectionsResult results) {
+        return "Time :" + results.routes[0].legs[0].duration.humanReadable
+                + " Distance :" + results.routes[0].legs[0].distance.humanReadable;
+    }
+>>>>>>> 9d12ef7180da2264a6910cb579f1ccab34c5e1a3
 
         double lat = prev.latitude;
         double lon = prev.longitude;
@@ -780,6 +852,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return (result);
     }
 
+<<<<<<< HEAD
     public void plot_cameras(){
         for(int i = 0; i < num_cameras; i++) {
             Camera curr_camera = cam_objects.get(i);
@@ -792,6 +865,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Bitmap temp = BitmapFactory.decodeResource(context.getResources(),//TURN THE DRAWABLE ICON INTO A BITMAP
                     R.drawable.cam_marker);
             Bitmap custom_marker = Bitmap.createScaledBitmap(temp, 60, 100, true); //RESCALE BITMAP ICON TO PROPER SIZE
+=======
+    private void addPolyline(DirectionsResult results, GoogleMap mMap) {
+        List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
+        mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+>>>>>>> 9d12ef7180da2264a6910cb579f1ccab34c5e1a3
 
 
             MarkerOptions a = new MarkerOptions()
